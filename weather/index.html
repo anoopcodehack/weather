@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+
+<body class="min-h-screen bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400 flex flex-col items-center py-12 px-4">
+
+  <h1 class="text-4xl font-extrabold mb-8 text-white drop-shadow-lg">🌤️ Weather App</h1>
+
+  <!-- Input & Button -->
+  <div class="mb-6 flex w-full max-w-md gap-3">
+    <input id="cityInput" 
+      type="text"
+      placeholder="Enter city"
+      class="flex-1 p-3 rounded-lg border border-gray-200 shadow-md focus:outline-none focus:ring-2 focus:ring-white text-gray-700"
+      value="Mumbai"
+    />
+
+    <button onclick="fetchWeather()"
+      class="bg-white text-blue-500 font-semibold p-3 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 hover:bg-blue-100">
+      Get Weather
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <p id="loadingText" class="text-white text-lg animate-pulse hidden">Fetching weather...</p>
+
+  <!-- Error -->
+  <p id="errorText" class="text-red-200 text-lg"></p>
+
+  <!-- Weather Card -->
+  <div id="weatherCard"
+    class="bg-white/90 backdrop-blur-md shadow-xl rounded-2xl p-6 mt-6 w-full max-w-md hidden">
+    
+    <div class="flex items-center justify-between mb-4">
+      <h2 id="cityName" class="text-2xl font-bold"></h2>
+      <img id="weatherIcon" src="" alt="" />
+    </div>
+
+    <p class="text-lg">
+      🌡️ Temperature: <span id="temp" class="font-semibold"></span>
+    </p>
+    <p class="text-lg">
+      💧 Humidity: <span id="humidity" class="font-semibold"></span>
+    </p>
+    <p class="text-lg">
+      📝 Condition: <span id="description" class="capitalize font-medium"></span>
+    </p>
+  </div>
+
+  <script>
+    async function fetchWeather() {
+      const city = document.getElementById("cityInput").value;
+      const loading = document.getElementById("loadingText");
+      const error = document.getElementById("errorText");
+      const card = document.getElementById("weatherCard");
+
+      if (!city) return;
+
+      loading.classList.remove("hidden");
+      error.textContent = "";
+      card.classList.add("hidden");
+
+      try {
+        const apiKey = "2584f727f8c313b5e0167aa79e14bf3e"; // put your API key
+        
+        const res = await fetch(
+          `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`
+        );
+        const data = await res.json();
+
+        if (!res.ok) {
+          error.textContent = data.message || "City not found";
+          return;
+        }
+
+        document.getElementById("cityName").textContent = data.name;
+        document.getElementById("temp").textContent = data.main.temp + "°C";
+        document.getElementById("humidity").textContent = data.main.humidity + "%";
+        document.getElementById("description").textContent =
+          data.weather[0].description;
+        document.getElementById("weatherIcon").src =
+          `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+
+        card.classList.remove("hidden");
+
+      } catch (e) {
+        error.textContent = "Failed to fetch weather";
+      } finally {
+        loading.classList.add("hidden");
+      }
+    }
+  </script>
+</body>
+</html>
